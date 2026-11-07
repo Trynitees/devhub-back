@@ -3,7 +3,7 @@ package com.devhub.devhub.user.dto;
 import com.devhub.devhub.user.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record UserResponce(
+public record UserResponse(
         Long id,
         String username,
         String email,
@@ -13,8 +13,8 @@ public record UserResponce(
         String bio,
         String avatar,
         @JsonProperty("is_staff") boolean isStaff) {
-    public static UserResponce from(User u){
-        return new UserResponce(u.getId(), u.getUsername(), u.getEmail(), u.getFirstname(), u.getLastname(),u.getPatronomic(), u.getBio(), u.getAvatar(), u.isStaff());
+    public static UserResponse from(User u){
+        return new UserResponse(u.getId(), u.getUsername(), u.getEmail(), u.getFirstname(), u.getLastname(),u.getPatronomic(), u.getBio(), u.getAvatar(), u.isStaff());
 
     }
 }
