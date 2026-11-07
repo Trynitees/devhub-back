@@ -1,0 +1,51 @@
+package com.devhub.devhub.user;
+
+import com.devhub.devhub.common.ApiException;
+import com.devhub.devhub.user.dto.LoginRequest;
+import com.devhub.devhub.user.dto.RegisterRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder){
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public User register(RegisterRequest req){
+        if (userRepository.existsByUsername(req.username())){
+            throw new ApiException(HttpStatus.BAD_REQUEST, "username", "Пользователь с таким именем уже существует");
+        }
+        if (userRepository.existsByEmailIgnoreCase(req.email())){
+            throw new ApiException(HttpStatus.BAD_REQUEST, "email", "Этот email уже используется");
+        }
+        if (!req.password().equals(req.password2())){
+            throw new ApiException(HttpStatus.BAD_REQUEST, "password2", "Пароль не совпадает");
+        }
+
+        User user = new User();
+        user.setUsername(req.username());
+        user.setEmail(req.email());
+        user.setPassword(passwordEncoder.encode(req.password()));
+        return userRepository.save(user);
+    }
+
+    public User login(LoginRequest req){
+        User user = userRepository.findByUsername(req.username())
+                .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "default", "Неверное имя пользователя или пароль"));
+        if (!passwordEncoder.matches(req.password(), user.getPassword())){
+            throw new ApiException(HttpStatus.BAD_REQUEST, "detail", "Неверное имя пользователя или пароль");
+        }
+        return user;
+    }
+
+    public User getByUsername(String username){
+        return userRepository.findByUsername(username)
+                .orElseThrow(()-> new ApiException(HttpStatus.UNAUTHORIZED, "detail", "Нужно войти"));
+    }
+}
