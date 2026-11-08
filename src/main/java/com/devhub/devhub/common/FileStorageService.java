@@ -21,14 +21,18 @@ public class FileStorageService {
     }
 
     public String save(MultipartFile file, String folder){
+        String original = file.getOriginalFilename();
         String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("/image")){
+
+        boolean imageType = contentType != null && contentType.startsWith("image/");
+        boolean imageExt = original != null
+                && original.toLowerCase().matches(".*\\.(jpg|jpeg|png|gif|webp)");
+        if (!imageType && !imageExt) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "avatar", "Нужно загрузить изображение");
         }
         try {
-            String original = file.getOriginalFilename();
             String ext = "";
-            if (original != null && original.contains(".")){
+            if (original != null && original.contains(".")) {
                 ext = original.substring(original.lastIndexOf('.'));
             }
             String name = UUID.randomUUID() + ext;
@@ -36,7 +40,7 @@ public class FileStorageService {
             Files.createDirectories(dir);
             Files.copy(file.getInputStream(), dir.resolve(name), StandardCopyOption.REPLACE_EXISTING);
             return "/media/" + folder + "/" + name;
-        } catch (IOException e){
+        } catch (IOException e) {
             throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "detail", "Не удалось сохранить файл");
         }
     }
