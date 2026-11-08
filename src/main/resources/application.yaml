@@ -4,7 +4,9 @@ spring:
   jackson:
     property-naming-strategy: SNAKE_CASE
   datasource:
-    url: jdbc:h2:file:./data/devhub
+    url: jdbc:postgresql://localhost:5432/devhub
+    username: ${DB_USERNAME:devhub}
+    password: ${DB_PASSWORD:devhub}
   jpa:
     hibernate:
       ddl-auto: update

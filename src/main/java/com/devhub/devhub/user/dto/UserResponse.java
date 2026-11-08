@@ -7,9 +7,9 @@ public record UserResponse(
         Long id,
         String username,
         String email,
-        String firstname,
-        String lastname,
-        String patronomic,
+        String firstName,
+        String lastName,
+        String patronymic,
         String bio,
         String avatar,
         @JsonProperty("is_staff") boolean isStaff) {
