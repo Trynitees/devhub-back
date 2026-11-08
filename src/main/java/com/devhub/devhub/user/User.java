@@ -22,7 +22,7 @@ public class User {
 
     private String firstname = "";
     private String lastname= "";
-    private String patronomic = "";
+    private String patronymic = "";
 
     @Column(length = 300)
     private String bio = "";
@@ -79,12 +79,12 @@ public class User {
         this.lastname = lastname;
     }
 
-    public String getPatronomic() {
-        return patronomic;
+    public String getPatronymic() {
+        return patronymic;
     }
 
-    public void setPatronomic(String patronomic) {
-        this.patronomic = patronomic;
+    public void setPatronymic(String patronymic) {
+        this.patronymic = patronymic;
     }
 
     public String getBio() {

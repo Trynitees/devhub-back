@@ -14,7 +14,7 @@ public record UserResponse(
         String avatar,
         @JsonProperty("is_staff") boolean isStaff) {
     public static UserResponse from(User u){
-        return new UserResponse(u.getId(), u.getUsername(), u.getEmail(), u.getFirstname(), u.getLastname(),u.getPatronomic(), u.getBio(), u.getAvatar(), u.isStaff());
+        return new UserResponse(u.getId(), u.getUsername(), u.getEmail(), u.getFirstname(), u.getLastname(),u.getPatronymic(), u.getBio(), u.getAvatar(), u.isStaff());
 
     }
 }
