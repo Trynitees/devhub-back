@@ -28,7 +28,7 @@ public class FileStorageService {
         boolean imageExt = original != null
                 && original.toLowerCase().matches(".*\\.(jpg|jpeg|png|gif|webp)");
         if (!imageType && !imageExt) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "avatar", "Нужно загрузить изображение");
+            throw new ApiException(HttpStatus.BAD_REQUEST, file.getName(), "Нужно загрузить изображение");
         }
         try {
             String ext = "";
