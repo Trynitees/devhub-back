@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException e){
         Map<String, List<String>> errors = new HashMap<>();
         for (FieldError fe : e.getBindingResult().getFieldErrors()){
-            errors.computeIfAbsent(fe.getField(), k -> new ArrayList<>())
+            errors.computeIfAbsent(toSnake(fe.getField()), k -> new ArrayList<>())
                     .add(fe.getDefaultMessage());}
         return ResponseEntity.badRequest().body(new ErrorResponse(false, errors));
     }
@@ -33,5 +33,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponse> handleTooBig(MaxUploadSizeExceededException e){
         return ResponseEntity.badRequest().body(ErrorResponse.of("avatar", "Файл больше 2МБ"));
+    }
+
+    private String toSnake(String field){
+        return field.replaceAll("([A-Z])", "_$1").toLowerCase();
     }
 }
