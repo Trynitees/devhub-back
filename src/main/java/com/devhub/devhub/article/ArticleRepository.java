@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ArticleRepository extends JpaRepository<Article, Long> {
     List<Article> findByTagsName(String tagName, Sort sort);
-    List<Article> findByFavoriteUsernameOrderByCreatedDesc(String username);
+    List<Article> findByFavoritesUsernameOrderByCreatedDesc(String username);
 
     boolean existsBySourceUrl(String sourceUrl);
 }
