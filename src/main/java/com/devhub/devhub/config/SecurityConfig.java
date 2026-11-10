@@ -27,6 +27,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/profile/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .requestMatchers("/api/posts/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/articles/favorites/").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/articles/*/favorite/").authenticated()
+                        .requestMatchers("/api/articles/**").hasRole("ADMIN")
                         .anyRequest().permitAll())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, e) -> writeJson(response, 401, "Нужно войти"))
