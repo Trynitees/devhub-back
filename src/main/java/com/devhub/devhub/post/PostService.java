@@ -6,6 +6,10 @@ import com.devhub.devhub.post.dto.CommentResponse;
 import com.devhub.devhub.post.dto.PostResponse;
 import com.devhub.devhub.user.User;
 import com.devhub.devhub.user.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,8 +40,12 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public List<PostResponse> list(String username){
-        return postRepository.findAllByOrderByCreatedDesc().stream().map(post -> toResponse(post, username)).toList();
+    public Page<PostResponse> list(String username, int page, int size) {
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 1) - 1,
+                Math.min(Math.max(size, 1), 50),
+                Sort.by("created").descending());
+        return postRepository.findAll(pageable).map(post -> toResponse(post, username));
     }
 
     @Transactional(readOnly = true)

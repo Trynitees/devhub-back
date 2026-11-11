@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
 
 import java.security.Principal;
 import java.util.Map;
@@ -24,8 +25,16 @@ public class PostController {
     }
 
     @GetMapping("/")
-    public Map<String, Object> list(Principal principal) {
-        return Map.of("ok", true, "posts", postService.list(username(principal)));
+    public Map<String, Object> list(@RequestParam(defaultValue = "1") int page,
+                                    @RequestParam(defaultValue = "10") int size,
+                                    Principal principal) {
+        Page<PostResponse> result = postService.list(username(principal), page, size);
+        return Map.of("ok", true,
+                "posts", result.getContent(),
+                "page", result.getNumber() + 1,
+                "size", result.getSize(),
+                "total", result.getTotalElements(),
+                "total_pages", result.getTotalPages());
     }
 
     @GetMapping("/{id}/")

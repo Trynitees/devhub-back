@@ -3,6 +3,7 @@ package com.devhub.devhub.article;
 import com.devhub.devhub.article.dto.ArticleRequest;
 import com.devhub.devhub.article.dto.ArticleResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +24,17 @@ public class ArticleController {
     @GetMapping("/")
     public Map<String, Object> list(@RequestParam(defaultValue = "") String tag,
                                     @RequestParam(defaultValue = "newest") String sort,
+                                    @RequestParam(defaultValue = "1") int page,
+                                    @RequestParam(defaultValue = "12") int size,
                                     Principal principal) {
-        return Map.of("ok", true, "articles", articleService.list(tag, sort, username(principal)));
+        Page<ArticleResponse> result = articleService.list(tag, sort, username(principal), page, size);
+        return Map.of(
+                "ok", true,
+                "articles", result.getContent(),
+                "page", result.getNumber() + 1,
+                "size", result.getSize(),
+                "total", result.getTotalElements(),
+                "total_pages", result.getTotalPages());
     }
 
     @GetMapping("/favorites/")
