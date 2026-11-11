@@ -45,11 +45,15 @@ public class PostService {
                 Math.max(page, 1) - 1,
                 Math.min(Math.max(size, 1), 50),
                 Sort.by("created").descending());
-        return postRepository.findAll(pageable).map(post -> toResponse(post, username));
+        return postRepository.findByStatus(PostStatus.APPROVED ,pageable).map(post -> toResponse(post, username));
     }
 
     @Transactional(readOnly = true)
     public PostResponse get(Long id, String username){
+        Post post = findPost(id);
+        if (post.getStatus() != PostStatus.APPROVED && !canSeeUnapproved(post, username)) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "detail", "Пост не найден");
+        }
         return toResponse(findPost(id), username);
     }
 
@@ -73,7 +77,8 @@ public class PostService {
         Post post = new Post();
         post.setTitle(cleanTitle);
         post.setText(cleanText);
-        post.setAuthor(userService.getByUsername(username));
+        post.setAuthor(author);
+        post.getStatus(author.isStaff() ? PostStatus.APPROVED : PostStatus.PENDING);
 
         if (photo != null && !photo.isEmpty()) {
             post.setPhoto(fileStorageService.save(photo, "posts"));
@@ -105,7 +110,7 @@ public class PostService {
 
     @Transactional
     public Map<String, Object> toggleLike(Long id, String username) {
-        Post post = findPost(id);
+        Post post = findApprovedPost(id);
         User user = userService.getByUsername(username);
 
         boolean removed = post.getLikes().removeIf(u -> u.getId().equals(user.getId()));
@@ -119,7 +124,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public List<CommentResponse> comments(Long postId) {
-        findPost(postId);
+        findApprovedPost(postId);
         return commentRepository.findByPostIdOrderByCreatedAsc(postId).stream()
                 .map(CommentResponse::from)
                 .toList();
@@ -127,7 +132,7 @@ public class PostService {
 
     @Transactional
     public CommentResponse addComment(Long postId, String username, String text) {
-        Post post = findPost(postId);
+        Post post = findApprovedPost(postId);
         Comment comment = new Comment();
         comment.setPost(post);
         comment.setAuthor(userService.getByUsername(username));
@@ -135,9 +140,49 @@ public class PostService {
         return CommentResponse.from(commentRepository.save(comment));
     }
 
+    @Transactional(readOnly = true)
+    public List<PostResponse> pending() {
+        return postRepository.findByStatusOrderByCreatedAsc(PostStatus.PENDING).stream()
+                .map(post -> toResponse(post, null))
+                .toList();
+    }
+
+    @Transactional
+    public PostResponse approve(Long id) {
+        return setStatus(id, PostStatus.APPROVED);
+    }
+
+    @Transactional
+    public PostResponse reject(Long id) {
+        return setStatus(id, PostStatus.REJECTED);
+    }
+
+    private PostResponse setStatus(Long id, PostStatus status) {
+        Post post = findPost(id);
+        post.setStatus(status);
+        postRepository.save(post);
+        return toResponse(post, null);
+    }
+
     private Post findPost(Long id) {
         return postRepository.findById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "detail", "Пост не найден"));
+    }
+
+    private Post findApprovedPost(Long id) {
+        Post post = findPost(id);
+        if (post.getStatus() != PostStatus.APPROVED) {
+            throw new ApiException(HttpStatus.NOT_FOUND, "detail", "Пост не найден");
+        }
+        return post;
+    }
+
+    private boolean canSeeUnapproved(Post post, String username) {
+        if (username == null) {
+            return false;
+        }
+        User user = userService.getByUsername(username);
+        return user.isStaff() || post.getAuthor().getId().equals(user.getId());
     }
 
     private PostResponse toResponse(Post post, String username) {
