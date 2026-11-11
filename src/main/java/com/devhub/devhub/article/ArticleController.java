@@ -39,7 +39,7 @@ public class ArticleController {
 
     @GetMapping("/{id}/")
     public Map<String, Object> get(@PathVariable Long id, Principal principal) {
-        return Map.of("ok", true, "articles", articleService.get(id, username(principal)));
+        return Map.of("ok", true, "article", articleService.get(id, username(principal)));
     }
 
     @PostMapping("/create/")
