@@ -61,7 +61,7 @@ public class ArticleController {
         return Map.of("ok", true);
     }
 
-    @PostMapping("/{id}/favorite")
+    @PostMapping("/{id}/favorite/")
     public Map<String, Object> favorite(@PathVariable Long id, Principal principal) {
         return articleService.toogleFavorite(id, principal.getName());
     }
