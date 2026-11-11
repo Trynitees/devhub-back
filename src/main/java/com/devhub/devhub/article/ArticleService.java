@@ -8,7 +8,9 @@ import com.devhub.devhub.post.Tag;
 import com.devhub.devhub.post.TagRepository;
 import com.devhub.devhub.user.User;
 import com.devhub.devhub.user.UserService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -38,17 +40,20 @@ public class ArticleService {
     }
 
     @Transactional(readOnly = true)
-    public List<ArticleResponse> list(String tag, String sort, String username) {
+    public Page<ArticleResponse> list(String tag, String sort, String username, int page, int size) {
         Sort order = switch (sort) {
             case "oldest" -> Sort.by("created").ascending();
             case "title" -> Sort.by("title").ascending();
             default -> Sort.by("created").descending();
         };
-
-        List<Article> articles = tag.isBlank()
-                ? articleRepository.findAll(order)
-                : articleRepository.findByTagsName(tag, order);
-        return articles.stream().map(a -> toResponse(a, username)).toList();
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 1) - 1,
+                Math.min(Math.max(size, 1), 50),
+                order);
+        Page<Article> result = tag.isBlank()
+                ? articleRepository.findAll(pageable)
+                : articleRepository.findByTagsName(tag, pageable);
+        return result.map(a -> toResponse(a, username));
     }
 
     @Transactional(readOnly = true)
