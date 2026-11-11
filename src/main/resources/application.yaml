@@ -20,3 +20,11 @@ server:
 
 app:
   upload-dir: uploads
+  parser:
+    sources:
+      - name: Habr
+        url: https://habr.com/ru/rss/articles/
+      - name: Tproger
+        url: https://tproger.ru/feed
+      - name: 3DNews
+        url: https://3dnews.ru/software-news/rss
