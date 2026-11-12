@@ -9,12 +9,13 @@ import java.util.List;
 
 public record PostResponse(Long id, String title, String text, String photo, AuthorResponse author,
                            List<String> tags, LocalDateTime created, int likesCount, long commentsCount,
-                           @JsonProperty("is_liked") boolean isLiked) {
+                           @JsonProperty("is_liked") boolean isLiked, String status) {
     public static PostResponse from(Post post, long commentsCount, boolean liked){
         List<String> tagNames = post.getTags().stream().map(Tag::getName).sorted().toList();
+        String status = post.getStatus() == null ? null : post.getStatus().name().toLowerCase();
         return new PostResponse(post.getId(), post.getTitle(), post.getText(), post.getPhoto(),
                 AuthorResponse.from(post.getAuthor()), tagNames, post.getCreated(),
-                post.getLikes().size(), commentsCount, liked);
+                post.getLikes().size(), commentsCount, liked, status);
     }
 
 }

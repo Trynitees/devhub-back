@@ -14,6 +14,8 @@ import org.springframework.data.domain.Page;
 import java.security.Principal;
 import java.util.Map;
 
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
@@ -37,6 +39,11 @@ public class PostController {
                 "total_pages", result.getTotalPages());
     }
 
+    @GetMapping("/pending/")
+    public Map<String, Object> pending() {
+        return Map.of("ok", true, "posts", postService.pending());
+    }
+
     @GetMapping("/{id}/")
     public Map<String, Object> get(@PathVariable Long id, Principal principal) {
         return Map.of("ok", true, "post", postService.get(id, username(principal)));
@@ -51,7 +58,20 @@ public class PostController {
             @RequestParam(name = "photo", required = false) MultipartFile photo) {
 
         PostResponse post = postService.create(principal.getName(), title, text, tagsInput, photo);
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("ok", true, "post", post));
+        String message = "approved".equals(post.status())
+                ? "Пост опубликован"
+                : "Пост отправлен на модерацию";
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("ok", true, "post", post, "message", message));
+    }
+
+    @PostMapping("/{id}/approve/")
+    public Map<String, Object> approve(@PathVariable Long id) {
+        return Map.of("ok", true, "post", postService.approve(id));
+    }
+
+    @PostMapping("/{id}/reject/")
+    public Map<String, Object> reject(@PathVariable Long id) {
+        return Map.of("ok", true, "post", postService.reject(id));
     }
 
     @DeleteMapping("/{id}/delete/")
