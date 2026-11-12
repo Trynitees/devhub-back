@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/profile/**").authenticated()
+                        .requestMatchers("/api/posts/pending/", "/api/posts/*/approve/", "/api/posts/*/reject/").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .requestMatchers("/api/posts/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/articles/favorites/").authenticated()
