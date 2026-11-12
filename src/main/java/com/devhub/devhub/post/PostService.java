@@ -74,11 +74,13 @@ public class PostService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "text", "Не более 5000 символов");
         }
 
+        User author = userService.getByUsername(username);
+
         Post post = new Post();
         post.setTitle(cleanTitle);
         post.setText(cleanText);
         post.setAuthor(author);
-        post.getStatus(author.isStaff() ? PostStatus.APPROVED : PostStatus.PENDING);
+        post.setStatus(author.isStaff() ? PostStatus.APPROVED : PostStatus.PENDING);
 
         if (photo != null && !photo.isEmpty()) {
             post.setPhoto(fileStorageService.save(photo, "posts"));
