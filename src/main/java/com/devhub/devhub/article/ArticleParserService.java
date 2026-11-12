@@ -83,8 +83,10 @@ public class ArticleParserService {
                 .orElseGet(() -> tagRepository.save(new Tag(source.name())));
 
         int added = 0;
-        List<SyndEntry> entries = feed.getEntries().stream().limit(LIMIT_PER_SOURCE).toList();
-        for (SyndEntry entry : entries) {
+        for (SyndEntry entry : feed.getEntries()) {
+            if (added >= LIMIT_PER_SOURCE) {
+                break;
+            }
             String link = entry.getLink();
             if (link == null || entry.getTitle() == null || articleRepository.existsBySourceUrl(link)) {
                 continue;

@@ -2,7 +2,6 @@ package com.devhub.devhub.article;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import javax.xml.transform.Source;
 import java.util.List;
 
 @ConfigurationProperties(prefix = "app.parser")
